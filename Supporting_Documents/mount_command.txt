@@ -1,0 +1,2 @@
+mount -t cifs //192.168.0.61/mfgc /home/pi/tailwater -o password=sb0202$01DUT01
+

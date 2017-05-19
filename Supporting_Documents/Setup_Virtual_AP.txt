@@ -1,0 +1,74 @@
+This document contains instruction on adding virtual AP to Raspberry Pi 3 using existing wlan0 interface.
+
+1. update raspberry pi
+	sudo apt-get update
+	sudo apt-get upgrade
+	
+2. Install hostapd and dnsmasq
+	sudo apt-get install hostapd
+	sudo apt-get install dnsmasq
+	
+3. Set static interface for uap0. Make like the below 
+
+	pi@raspberrypi:~ $ sudo nano /etc/network/interfaces
+
+	auto lo
+	iface lo inet loopback
+
+	iface eth0 inet manual
+
+	allow-hotplug wlan0
+	iface wlan0 inet manual
+		wpa-conf /etc/wpa_supplicant/wpa_supplicant.conf
+
+	allow-hotplug wlan1
+	iface wlan1 inet manual
+		wpa-conf /etc/wpa_supplicant/wpa_supplicant.conf
+
+	auto uap0
+	iface uap0 inet static
+		address 192.168.50.1
+		netmask 255.255.255.0
+		network 192.168.50.0
+		broadcast 192.168.50.255
+		gateway 192.168.50.1
+		
+4. Edit hostapd.conf.
+	pi@raspberrypi:~ $ sudo nano /etc/hostapd/hostapd.conf
+
+	interface=uap0
+	ssid=Tailwater
+	hw_mode=g
+	channel=6
+	macaddr_acl=0
+	auth_algs=1
+	ignore_broadcast_ssid=0
+	wpa=2
+	wpa_passphrase=TailwaterSystems
+	wpa_key_mgmt=WPA-PSK
+	wpa_pairwise=TKIP
+	rsn_pairwise=CCMP
+
+5. Modify sudo nano /etc/default/hostapd
+	Find:
+	#DAEMON_CONF="" 
+	Replace with:
+	DAEMON_CONF="/etc/hostapd/hostapd.conf"
+	
+6. Add the below to dnsmasq.conf
+	sudo nano /etc/sysctl.conf
+	#conf-dir=/etc/dnsmasq.d,.bak
+	interface=lo,uap0
+	no-dhcp-interface=lo,wlan0
+	#bind-interfaces
+	#server=8.8.8.8
+	#domain-needed
+	#bogus-priv
+	dhcp-range=192.168.50.50,192.168.50.150,12h
+	# Include all files in a directory which end in .conf
+	#conf-dir=/etc/dnsmasq.d/,*.conf
+
+7 Modify rc.local
+	sudo nano /etc/rc.local
+	sudo service hostapd start
+	sudo service dnsmasq start
