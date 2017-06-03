@@ -120,7 +120,7 @@ if __name__ == '__main__':
         time.sleep(2)
 
     # Initialize ORP I2C Sensor
-    orp_sensor = ORPI2C.ORPI2C()
+    orp_sensor = ORPI2C.Probe()
 
     last_upload = None
     _clear_local_data()
