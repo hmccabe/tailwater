@@ -100,23 +100,14 @@ def main():
 	lastModified = ""
 	checkModDate = "stat device.cfg | grep Modify"
 	myPiConfig = getParameters(configFile, 'DEVICE')
-	myPi = initDevice(myPiConfig)
+	myPi = Device(configFile, 'DEVICE')
 
 	lastModified = checkModDate
 	print "my device " + myPi.getName()
 	
 	while True:
 		time.sleep(10)
-		modDate = sendcmd(checkModDate)
-		#check config file for updated wifi settings then updates class device and triggers new association
-		if not lastModified == modDate:
-			myPiConfig = getParameters(configFile, 'DEVICE')
-			lastModified = modDate
-			if not myPi.getSSID == myPiConfig['ssid'] or not myPi.getPassword == myPiConfig['password']:
-				myPi.setSSID(myPiConfig['ssid'])
-				myPi.setPassword(myPiConfig['password'])
-				connectWifi(myPi)
-		#if wifi not connected triggers association event
-		elif not isConnected():
+
+		if not isConnected():
 			connectWifi(myPi)
 	

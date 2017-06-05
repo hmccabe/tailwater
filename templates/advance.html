@@ -6,7 +6,7 @@
   $SCRIPT_ROOT = {{ request.script_root|tojson|safe }};
 </script>
     <head>
-        <title>Tailwater Systems Sensor</title>
+        <title>Tailwater Systems Advanced Menu</title>
        <link rel="stylesheet" media="screen" href ="static/bootstrap.min.css">
        <link rel="stylesheet" href="static/bootstrap-theme.min.css">
        <meta name="viewport" content = "width=device-width, initial-scale=1.0">
@@ -17,22 +17,30 @@
 <div class="container">
  
  
-  <h2>ORP Module Setup</h2>
-  <form  action="" method="post" role="form">
+  <h2>ORP Module Advanced Setup</h2>
+  <h3>Warning incorrect infromation will interup AWS service, <br>double check information before submitting!</h3>
+  <form  action="" enctype=multipart/form-data  method="post" role="form">
     {{ form.csrf }}
     <div class="form-group">
-      <label for="queryInterval">Query Interval:</label>
-      <input type="text" class="form-control" id="queryInterval" name="queryInterval" placeholder="Enter time from 1 to 60 minutes.">
+      <label for="name">Device Id:</label>
+      <input type="text" class="form-control" id="devId" name="devId" placeholder="Set device ID.">
       <br>
-      <label for="password">Router SSID:</label>
-      <input type="text" class="form-control" id="ssid" name="ssid" placeholder="Enter router SSID.">
+      <label for="endpoint">Endpoint:</label>
+      <input type="text" class="form-control" id="endpoint" name="endpoint" placeholder="Enter AWS Endpoint.">
 	  <br>
-	  <label for="password">Password:</label>
-      <input type="password" class="form-control" id="password" name="password" placeholder="Enter a password.">
+	  <label for="rootca">root-CA:</label>
+	  <input type="file" name="rootca">
+	  <br>
+	  <label for="privatekey">Private Key:</label>
+	  <input type="file" name="privatekey">
+	  <br>
+	  <label for="certpem">Certificate PEM File:</label>
+	  <input type="file" name="certpem">
     </div>
-    <button type="submit" name="checkConn" value="submit">Submit</button>
-	<button type="submit" name="checkConn" value="checkConn"> Check Connection</button>
+	<br>
+    <button type="submit" name="submit" value="submit">Submit</button>
   </form>
+	<p><a href='/' id=basicSetup>Back to Basic Setup</a>
  
   <br>
         {% with messages = get_flashed_messages(with_categories=true) %}
@@ -56,24 +64,7 @@
  
 </div>
 <br>            
-	<p><a href='/advanced' id=basicSetup>Go to Advanced Setup</a>
 </div>
-<script type=text/javascript>
-  $(function() {
-    $('a#calculate').bind('click', function() {
-      $.getJSON($SCRIPT_ROOT + '/_getReading', 
-	    function(data) {
-        $("#result").text(data.result);
-      });
-      return false;
-    });
-  });
-  
-</script>
-<h2>ORP Sensor Reading</h2>
-<p>
-   <span id=result>?</span>
-<p><a href=# id=calculate>Get Sensor Reading</a>
 </div>
 
 </body>
