@@ -1,78 +1,80 @@
 <!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd">
 <html>
 <script type=text/javascript src="{{
-  url_for('static', filename='jquery-3.2.1.min.js') }}"></script>
+	url_for('static', filename='jquery-3.2.1.min.js') }}"></script>
 <script type=text/javascript>
-  $SCRIPT_ROOT = {{ request.script_root|tojson|safe }};
+	$SCRIPT_ROOT = {{ request.script_root|tojson|safe }};
 </script>
-    <head>
-        <title>Tailwater Systems Sensor</title>
-       <link rel="stylesheet" media="screen" href ="static/bootstrap.min.css">
-       <link rel="stylesheet" href="static/bootstrap-theme.min.css">
-       <meta name="viewport" content = "width=device-width, initial-scale=1.0">
+		<head>
+			<title>Tailwater Systems ORP Module</title>
+			<link rel="stylesheet" type="text/css" href="{{ url_for('static', filename='piform.css')}}">
+			<meta name="viewport" content = "width=device-width, initial-scale=1.0">
 		
-    </head>
-    <body>
+		</head>
+		<body>
+<div id="container">
+	<img src="static/img/tailwater.jpg" alt="" />
+	<h3>ORP Module Setup</h3>
+	<form	action="" method="post" role="form">
+		{{ form.csrf }}
+		<div class="form-group">
+		<table>
+			<tr>
+				<td id="labels"><label for="queryInterval">Query Interval:</label></td>
+				<td id="userentry"><input type="text" class="form-control" id="queryInterval" name="queryInterval" placeholder="Enter time from 1 to 60 minutes."></td>
+			</tr>
+			<tr>
+				<td id="labels"><label for="password">Router SSID:</label></td>
+				<td id="userentry"><input type="text" class="form-control" id="ssid" name="ssid" placeholder="Enter router SSID."></td>
+			</tr>
+			<tr>
+				<td id="labels"><label for="password">Password:</label>
+				<td id="userentry"><input type="password" class="form-control" id="password" name="password" placeholder="Enter a password."></td>
+			</tr>
+		</table>
+		<br>
+		</div>
+		<button type="submit" name="checkConn" value="submit">Submit</button>
+		<button type="submit" name="checkConn" value="checkConn"> Check Connection</button>
+	</form>
+	<br>
+	<br>
+				{% with messages = get_flashed_messages(with_categories=true) %}
+						{% if messages %}
  
-<div class="container">
+				{% for message in messages %}
+						{% if "Error" not in message[1]: %}
+								<div id="flash" class="alert alert-info">
+								<strong>Form Submitted: </strong> {{ message[1] }}
+								</div>
+						{% endif %}
  
+						{% if "Error" in message[1]: %}
+								<div id="flash" class="alert alert-warning">
+								{{ message[1] }}
+								</div>
+						{% endif %}
+				{% endfor %}
+						{% endif %}
+				{% endwith %}
  
-  <h2>ORP Module Setup</h2>
-  <form  action="" method="post" role="form">
-    {{ form.csrf }}
-    <div class="form-group">
-      <label for="queryInterval">Query Interval:</label>
-      <input type="text" class="form-control" id="queryInterval" name="queryInterval" placeholder="Enter time from 1 to 60 minutes.">
-      <br>
-      <label for="password">Router SSID:</label>
-      <input type="text" class="form-control" id="ssid" name="ssid" placeholder="Enter router SSID.">
-	  <br>
-	  <label for="password">Password:</label>
-      <input type="password" class="form-control" id="password" name="password" placeholder="Enter a password.">
-    </div>
-    <button type="submit" name="checkConn" value="submit">Submit</button>
-	<button type="submit" name="checkConn" value="checkConn"> Check Connection</button>
-  </form>
- 
-  <br>
-        {% with messages = get_flashed_messages(with_categories=true) %}
-            {% if messages %}
- 
-        {% for message in messages %}
-            {% if "Error" not in message[1]: %}
-                <div class="alert alert-info">
-                <strong>Form Submitted: </strong> {{ message[1] }}
-                </div>
-            {% endif %}
- 
-            {% if "Error" in message[1]: %}
-                <div class="alert alert-warning">
-                {{ message[1] }}
-                </div>
-            {% endif %}
-        {% endfor %}
-            {% endif %}
-        {% endwith %}
- 
-</div>
-<br>            
+<br>						
 	<p><a href='/advanced' id=basicSetup>Go to Advanced Setup</a>
-</div>
 <script type=text/javascript>
-  $(function() {
-    $('a#calculate').bind('click', function() {
-      $.getJSON($SCRIPT_ROOT + '/_getReading', 
-	    function(data) {
-        $("#result").text(data.result);
-      });
-      return false;
-    });
-  });
-  
+	$(function() {
+		$('a#calculate').bind('click', function() {
+			$.getJSON($SCRIPT_ROOT + '/_getReading', 
+			function(data) {
+				$("#result").text(data.result);
+			});
+			return false;
+		});
+	});
+	
 </script>
-<h2>ORP Sensor Reading</h2>
+<h3>ORP Sensor Reading</h3>
 <p>
-   <span id=result>?</span>
+	 <span id=result>?</span>
 <p><a href=# id=calculate>Get Sensor Reading</a>
 </div>
 

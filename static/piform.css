@@ -1,0 +1,42 @@
+body {
+	background-color:rgb(171,201,3);
+}
+
+#container {
+	background-color:#ffffff;
+	width:50%;
+	margin: auto;
+	text-align:center;
+	padding-bottom: 15px;
+}
+
+#labels {
+	text-align: right;
+}
+
+#userentry{
+	text-align: left;
+}
+
+table {
+	border: 2px solid black;
+	width:auto;
+	padding: 0px;
+	margin: 0px;
+}
+#result {
+	font-weight: bold;
+	font-size: 20px;
+}
+.form-group{
+	margin: auto;
+}
+
+form {
+    display: inline-block;
+    text-align: center;
+    }
+	
+#flash {
+	text-align: left;
+}

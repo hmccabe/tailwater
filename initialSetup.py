@@ -74,18 +74,24 @@ def runAdvancedForm():
 					myPi.setRootCA(uploadDirectory + filename)
 				elif myPi.getRootCA() =='':
 					flash('root-CA.crt not uploaded. Do not modify ASW default file name.')
+				else:
+					flash("root-CA not updated. It was previously loaded and is set to " + myPi.getRootCA() + ".")
 			if 'privatekey' in request.files:
 				filename=files.save(request.files['privatekey'])
 				if 'private' in filename:
 					myPi.setPrivateKey(uploadDirectory + filename)
 				elif myPi.getPrivateKey() == '':
 					flash('private.pem.key not uploaded. Do not modify ASW default file name.')
+				else:
+					flash("private.pem.key not updated. It was previously loaded and is set to " + myPi.getPrivateKey() + ".")
 			if 'certpem' in request.files:
 				filename=files.save(request.files['certpem'])
 				if 'certificate.pem' in filename:
 					myPi.setCertPem(uploadDirectory + filename)
 				elif myPi.getCertPem() =='':
 					flash('certificate.pem.crt not uploaded. Do not modify ASW default file name.')
+				else:
+					flash("certificate.pem.crt not updated. It was previously loaded and is set to " + myPi.getCertPem() + ".")
 		except:
 			flash('If trying to upload files please upload all files at once.')
 				
@@ -93,10 +99,14 @@ def runAdvancedForm():
 			myPi.setName(devId)
 		elif myPi.getName() == '':
 			flash ('Device ID not set, must be 10 digit integer.')
-		if not endpoint == '':
+		elif not myPi.getName() == '':
+			flash ("Module ID was not updated, current ID is " + myPi.getName() +".")
+		if 'amazonaws.com' in endpoint:
 			myPi.setEndpoint(endpoint)
 		elif myPi.getEndpoint() == '':
 			flash ('AWS Endpoint not set and must be entered.')
+		elif not myPi.getEndpoint() == '':
+			flash ("Module endpoint was not updated, current endpoint is " + myPi.getEndpoint()+".")
 			
 	return render_template('advance.html', form=form)
 	
@@ -123,8 +133,8 @@ def runBasicForm():
 			myPi.setMeasureInterval(queryInterval)
 		elif myPi.getMeasureInterval() == '':
 			flash('Poll interval not set. Please add value 1 to 60 minutes.')
-		elif not queryInterval.isdigit() and myPi.getMeasureInterval() == '':
-			flash ('Query Interval	must be an integer from 1 to 60.')
+		elif not queryInterval.isdigit():
+			flash ('Query Interval not updated, must be an integer from 1 to 60.')
 		elif queryInterval.isdigit():
 			if (int(queryInterval) < 1 or int(queryInterval) > 60):
 				flash ('Query Interval	must be an integer from 1 to 60.')
