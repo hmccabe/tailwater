@@ -8,10 +8,14 @@ import time
 _data_filename = 'orp_data.csv'
 _error_log_filename = 'error_log'
 
+def get_target_range():
+    # TODO: get this from the config file/thing shadow
+    return [-50,50]
+
 def get_polling_interval():
-    """Return the configured polling interval as a float."""
-    # TODO: get this from the config file
-    return 5.0
+    """Return the configured polling interval in seconds as a float."""
+    # TODO: get this from the config file/thing shadow
+    return 15.0 * 60.0  # minutes converted to seconds
 
 
 def get_sensor_id():
@@ -26,9 +30,9 @@ def get_upload_interval():
     The datetime.timedelta is an object representing the difference between two datetimes.
     """
     # TODO: get this from the config file
-    return datetime.timedelta(seconds=10.0)
-    # interval = 60.0
-    # return datetime.timedelta(minutes=interval)
+    #return datetime.timedelta(seconds=15.0)
+    interval = 1.0
+    return datetime.timedelta(hours=interval)
 
 
 def _append_local_data(data):
@@ -77,15 +81,21 @@ def _read_local_data():
 def _update_cloud_database():
     """Send the contents of the local database to the cloud and clear the local database."""
     data = _read_local_data()
+    counter = 0  # need to have unique keys for each entry for AWS Lambda service to recognize them
+    message = '{'
     for line in data:
-        message = '{'
-        message += '"sensor_id":"' + line[0] + '",'
-        message += '"timestamp":"' + line[1] + '",'
-        message += '"reading":"' + line[2] + '"'
-        message += '}'  # TODO: is there an extra line break for some reason?
-        client.publish('DataUpdate', message)
+        message += '"entry' + str(counter) + '":"'
+        message += line[0].strip() + ','   # sensor_id
+        message += '' + line[1].strip() + ','   # timestamp
+        message += '' + line[2].strip() + '",'  # reading
+        counter += 1
+    message = message[:-1]  # remove the last index (extra comma)
+    message += '}'
+    print message
+    client.publish('DataUpload', message)
+    _clear_local_data()
+
     return True
-    # _clear_local_data()
 
 def _update_error_log(error_timestamp, message):
     """Format and display an error and append the local error log file."""
@@ -116,14 +126,13 @@ if __name__ == '__main__':
         client.connect()
 
         # TODO: These are for debug
-        client.subscribe('DataUpdate')
+        client.subscribe('DataUploadConfirmation')
         time.sleep(2)
 
     # Initialize ORP I2C Sensor
     orp_sensor = ORPI2C.Probe()
 
     last_upload = None
-    _clear_local_data()
     while True:
         # Take a reading from the probe and save it to the local data file
         reading = orp_sensor.poll()
