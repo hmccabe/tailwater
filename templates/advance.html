@@ -1,0 +1,78 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd">
+<html>
+<script type=text/javascript src="{{
+	url_for('static', filename='jquery-3.2.1.min.js') }}"></script>
+<script type=text/javascript>
+	$SCRIPT_ROOT = {{ request.script_root|tojson|safe }};
+</script>
+		<head>
+			 <link rel="stylesheet" type="text/css" href="{{ url_for('static', filename='piform.css')}}">
+			<meta name="viewport" content = "width=device-width, initial-scale=1.0">
+
+		
+		</head>
+		<body>
+<div id="container">
+	<img src="static/img/tailwater.jpg" alt="" />
+
+	<h3>ORP Module Advanced Setup</h3>
+	<h5>Warning! Incorrect information will interup AWS service, <br>double check information before submitting!</h5>
+	<form	action="" enctype=multipart/form-data	method="post" role="form">
+		{{ form.csrf }}
+	
+		<div class="form-group">
+	<table>
+		<tr>
+			<td id="labels"><label for="name">Device Id:</label></td>
+			<td id="userentry"><input type="text" class="form-control" id="devId" name="devId" placeholder="Set device ID."></td>
+		</tr>
+		<tr>
+			<td id="labels"><label for="endpoint">Endpoint:</label></td>
+			<td id="userentry"><input type="text" class="form-control" id="endpoint" name="endpoint" placeholder="Enter AWS Endpoint."></td>
+		</tr>
+		<tr>
+			<td id="labels"><label for="rootca">root-CA:</label></td>
+			<td id="userentry"><input type="file" name="rootca"></td>
+		</tr>
+		<tr>
+			<td id="labels"><label for="privatekey">Private Key:</label></td>
+			<td id="userentry"> <input type="file" name="privatekey"></td>
+		</tr>
+		<tr>
+			<td id="labels"><label for="certpem">Certificate PEM File:</label></td>
+			<td id="userentry"><input type="file" name="certpem"></td>
+		</tr>
+	</table>
+		</div>
+		<br>
+		<button type="submit" name="submit" value="submit">Submit</button>
+	</form>
+	<p><a href='/' id=basicSetup>Back to Basic Setup</a>
+ 
+	<br>
+				{% with messages = get_flashed_messages(with_categories=true) %}
+						{% if messages %}
+ 
+				{% for message in messages %}
+						{% if "Error" not in message[1]: %}
+								<div id="flash" class="alert alert-info">
+								<strong>Form Submitted: </strong> {{ message[1] }}
+								</div>
+						{% endif %}
+ 
+						{% if "Error" in message[1]: %}
+								<div id="flash" class="alert alert-warning">
+								{{ message[1] }}
+								</div>
+						{% endif %}
+				{% endfor %}
+						{% endif %}
+				{% endwith %}
+ 
+</div>
+<br>						
+</div>
+</div>
+
+</body>
+</html>
