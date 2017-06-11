@@ -40,17 +40,6 @@ configFile = 'device.cfg'
 configSection = 'DEVICE'
 myPi = Device(configFile, configSection)
 
-# Custom Shadow callback
-def customShadowCallback_Delta(payload, responseStatus, token):
-	# payload is a JSON string ready to be parsed using json.loads(...)
-	# in both Py2.x and Py3.x
-	print(responseStatus)
-	payloadDict = json.loads(payload)
-	print("++++++++DELTA++++++++++")
-	print("pollinterval: " + str(payloadDict["state"]["property"]))
-	print("version: " + str(payloadDict["version"]))
-	print("+++++++++++++++++++++++\n\n")
-	return payloadDict
 
 def customShadowResponse(payload, responseStatus, token):
 	if 'delta' in responseStatus:
@@ -59,10 +48,7 @@ def customShadowResponse(payload, responseStatus, token):
 		for dict in payloadDict:
 			for k, v in payloadDict.iteritems():
 				if k == 'state':
-					print v
 					for k1, v1 in v.iteritems():
-						print k1
-						print v1
 						JSONPayload = '{"state":{"reported":{"' + k1 + '": "' + str(v1) + '"}}}'
 						Bot.shadowUpdate(JSONPayload, customShadowCallback_Update, 5)
 						if k1 == 'pollInterval':
@@ -126,8 +112,8 @@ if isConnected():
 
 		# Listen on deltas
 
-		#Bot.shadowRegisterDeltaCallback(customShadowCallback_Delta)
+	
 		Bot.shadowRegisterDeltaCallback(customShadowResponse)
-		# Loop forever
+# Loop forever
 while True:
 	pass

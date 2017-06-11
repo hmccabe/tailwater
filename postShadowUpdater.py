@@ -16,11 +16,13 @@ import urllib2
 #}
 
 
-#state is either desired or reported, property is the actual parameter to change, value the value to which the parmeter is to be set 
+#uses post request to trigger aws lambda fuction and update thing shadow. 
 def shadowUpdater(state, property, value):
+	#formatted string for JSON request
 	JSONPayload = '{\"' + property + '\": \"' + str(value) + '\"}'
+	#lambda url
 	req = urllib2.Request( 'https://ihh4jaogw9.execute-api.us-west-2.amazonaws.com/UpdateShadowV1/updateshadow')
 	req.add_header('Content-Type', 'application/json')
 
 	response = urllib2.urlopen(req, JSONPayload)
-	print response
+

@@ -5,10 +5,9 @@ import ConfigParser
 class Device:
 
 	def __init__(self, file, section):
-		#get parameters from config file
+		#config file location and desired section
 		self.__file=file
 		self.__section=section
-
 
 	#set individual paramter in config file
 	def setConfigParam(self,paramName, value):
@@ -64,6 +63,15 @@ class Device:
 		
 	def setCertPem(self, certpem=''):
 		self.setConfigParam('CERTPEM', certpem)
+		
+	def setLowLimit(self, low=''):
+		self.setConfigParam('LOWLIMIT', certpem)
+		
+	def setHighLimit(self, high=''):
+		self.setConfigParam('HIGHLIMIT', high)
+		
+	def setUploadInterval(self, upload=''):
+		self.setConfigParam('UPLOADINTERVAL', upload)
 	
 	def getName(self):
 		return self.getConfigParam('name')
@@ -99,3 +107,15 @@ class Device:
 	def getCertPem(self):
 		certpem  = self.getConfigParam('certpem')
 		return certpem
+
+	def getHighLimit(self):
+		high = self.getConfigParam('highlimit')
+		return high
+		
+	def getLowLimit(self):
+		low  = self.getConfigParam('lowlimit')
+		return low
+		
+	def getUploadInterval(self):
+		upload  = self.getConfigParam('uploadinterval')
+		return upload

@@ -47,7 +47,6 @@ def getMacAddr():
 	getMac = "ifconfig wlan0 | grep HWaddr"
 	p = subprocess.Popen(getMac, shell=True, stdout=subprocess.PIPE)
 	out = p.stdout.read(100)
-	print out
 	wordList = out.split()
 	return wordList[-1]
 

@@ -25,9 +25,7 @@ def sendcmd(command):
 #checks if wifi client is connected to AP
 def isConnected():
 	checkWifi = "/sbin/ifconfig wlan0 | grep inet\ addr | wc -l"
-	print "check connection"
 	out = sendcmd(checkWifi)
-	print out
 	if '0' in out:
 		return False
 	elif '1' in out:
@@ -64,11 +62,9 @@ def connectWifi(Device):
 		if cmd == startWpaSup and "wpa_supplicant" not in sendcmd(wpaSupCeck):
 			sendcmd(startWpaSup)
 		elif not cmd == startWpaSup:
-			print cmd
 			time.sleep(1)
 			out = sendcmd(cmd)
-			print out
-		
+
 	return isConnected()
 
 #get parameters from config file
@@ -86,15 +82,8 @@ def getParameters(file, section):
 			print("exception on %s!" % option)
 			device[option] = None
 	return device
-
-#initalize device class
-def initDevice(devConfig):
-	device = Device(devConfig['name'], devConfig['measure'], devConfig['ssid'], devConfig['password'], devConfig['macaddr'])
-	return device	
-
 	
 def main():
-	print "start program"
 	
 	configFile = 'device.cfg'
 	lastModified = ""
@@ -103,7 +92,6 @@ def main():
 	myPi = Device(configFile, 'DEVICE')
 
 	lastModified = checkModDate
-	print "my device " + myPi.getName()
 	
 	while True:
 		time.sleep(10)
