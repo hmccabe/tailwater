@@ -40,8 +40,9 @@ class Device:
 	def setName(self, name=''):
 		self.setConfigParam('NAME', name)
 		
-	def setMeasureInterval(self, measureInterval=''):
+	def setPollInterval(self, measureInterval=''):
 		self.setConfigParam('MEASURE', measureInterval)
+		
 	
 	def setSSID(self, ssid=''):
 		self.setConfigParam('SSID', ssid)

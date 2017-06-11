@@ -10,7 +10,7 @@ from wifiSetup import isConnected
 import time
 import ORPI2C
 from classDevice import Device
-
+from postShadowUpdater import shadowUpdater
 # App config.
 DEBUG = True
 app = Flask(__name__)
@@ -117,7 +117,7 @@ def runBasicForm():
 
 	#print form().errors
 	if request.method == 'POST':
-		queryInterval=request.form['queryInterval']
+		pollInterval=request.form['queryInterval']
 		ssid=request.form['ssid']
 		password=request.form['password']
 		checkConn=request.form['checkConn']
@@ -129,14 +129,16 @@ def runBasicForm():
 			else:
 				flash('Wifi is not connected please allow more time or resubmit your settings.')
 		#verifies form input
-		if len(queryInterval) >= 1 and len(queryInterval) <= 2 and queryInterval.isdigit() and (int(queryInterval) >= 1 and int(queryInterval) <= 60):
-			myPi.setMeasureInterval(queryInterval)
-		elif myPi.getMeasureInterval() == '':
+		if len(pollInterval) >= 1 and len(pollInterval) <= 2 and pollInterval.isdigit() and (int(pollInterval) >= 1 and int(pollInterval) <= 60):
+			myPi.setPollInterval(pollInterval)
+			if isConnected():
+				shadowUpdater("desired", "property", pollInterval)
+		elif myPi.getPollInterval() == '':
 			flash('Poll interval not set. Please add value 1 to 60 minutes.')
-		elif not queryInterval.isdigit():
+		elif not pollInterval.isdigit():
 			flash ('Query Interval not updated, must be an integer from 1 to 60.')
-		elif queryInterval.isdigit():
-			if (int(queryInterval) < 1 or int(queryInterval) > 60):
+		elif pollInterval.isdigit():
+			if (int(pollInterval) < 1 or int(pollInterval) > 60):
 				flash ('Query Interval	must be an integer from 1 to 60.')
 		if len(ssid) >= 1 and len(ssid) <= 35:
 			myPi.setSSID(ssid)
