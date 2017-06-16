@@ -3,9 +3,9 @@ This project uses Raspberry Pi 3 to take readings from ORP probes, perform heuri
 
 ## Raspberry Pi ## 
 ### ORP Probe Polling Scripts ###
-**orp_manager.py** (main script)
-  ORPI2C.py
-  AWSIoTClient.py
+orp_manager.py (main script)
+ORPI2C.py
+AWSIoTClient.py
 ### Local Interface ###
 initialSetup.py
 ### tmeplates ###
