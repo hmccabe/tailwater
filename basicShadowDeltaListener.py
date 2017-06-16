@@ -25,6 +25,7 @@ from classDevice import Device
 from wifiSetup import isConnected
 from basicShadowUpdater import shadowUpdater
 import ast
+import ORPI2C
 # Shadow JSON schema:
 #
 # Name: Bot
@@ -50,9 +51,14 @@ def customShadowResponse(payload, responseStatus, token):
 				if k == 'state':
 					for k1, v1 in v.iteritems():
 						JSONPayload = '{"state":{"reported":{"' + k1 + '": "' + str(v1) + '"}}}'
-						Bot.shadowUpdate(JSONPayload, customShadowCallback_Update, 5)
 						if k1 == 'pollInterval':
+							Bot.shadowUpdate(JSONPayload, customShadowCallback_Update, 5)
 							myPi.setPollInterval(v1)
+						if k1 == 'orpval':
+							sensor = ORPI2C.Probe()
+							reading = sensor.poll() 
+							JSONPayload = '{"state":{"reported":{"' + k1 + '": "' + str(reading) + '"}, "desired":{"' + k1 + '": "' + str(reading) + '"}}}'
+							Bot.shadowUpdate(JSONPayload, customShadowCallback_Update, 5)
 					return
 	
 def customShadowCallback_Update(payload, responseStatus, token):

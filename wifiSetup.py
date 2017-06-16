@@ -6,6 +6,8 @@ import time
 import ConfigParser
 from classDevice import Device
 from threading import Timer
+import ORPI2C
+from postShadowUpdater import updatePollInterval, updateORPVal
 
 
 #sends system command and kill process if timer hit
@@ -67,28 +69,12 @@ def connectWifi(Device):
 
 	return isConnected()
 
-#get parameters from config file
-def getParameters(file, section):
-	device = {}
-	config=ConfigParser.ConfigParser()
-	config.read(file)
-	options = config.options(section)
-	for option in options:
-		try:
-			device[option] = config.get(section, option)
-			if device[option] == -1:
-				DebugPrint("skip: %s" % option)
-		except:
-			print("exception on %s!" % option)
-			device[option] = None
-	return device
-	
+
 def main():
 	
 	configFile = 'device.cfg'
 	lastModified = ""
 	checkModDate = "stat device.cfg | grep Modify"
-	myPiConfig = getParameters(configFile, 'DEVICE')
 	myPi = Device(configFile, 'DEVICE')
 
 	lastModified = checkModDate
@@ -97,5 +83,10 @@ def main():
 		time.sleep(10)
 
 		if not isConnected():
-			connectWifi(myPi)
+			if connectWifi(myPi):
+				time.sleep(30)
+				sensor = ORPI2C.Probe()
+				reading = sensor.poll() 
+				updatePollInterval(myPi.getName(), "pollInterval", myPi.getPollInterval())
+				updateORPVal(myPi.getName(), "orpval", str(reading))
 	

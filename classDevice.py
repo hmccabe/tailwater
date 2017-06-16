@@ -76,7 +76,7 @@ class Device:
 	def getName(self):
 		return self.getConfigParam('name')
 		
-	def getMeasureInterval(self):
+	def getPollInterval(self):
 		interval = self.getConfigParam('measure')
 		return interval
 		
