@@ -1,0 +1,20 @@
+console.log('Loading function');
+var AWS = require('aws-sdk');
+var iotdata = new AWS.IotData({endpoint:'https://a31wvqhbklkbzd.iot.us-west-2.amazonaws.com'}); 
+
+exports.handler = function(event, context) {
+    var update = {"state": {"desired": {"orpval": event.orpval}}};
+    
+    iotdata.updateThingShadow({
+        payload: JSON.stringify(update),
+        thingName: event.thingName
+        }, function(err, data) {
+            if (err) {
+                context.fail(err);
+            } else {
+                console.log(data);
+            }
+    });
+
+};
+

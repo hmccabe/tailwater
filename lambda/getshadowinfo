@@ -1,0 +1,23 @@
+console.log('Loading function');
+var AWS = require('aws-sdk');
+var iotdata = new AWS.IotData({endpoint:'https://a31wvqhbklkbzd.iot.us-west-2.amazonaws.com'}); 
+
+
+exports.handler=function(event,context,callback){
+//payload1=new Buffer(event.payload);
+//console.log(payload1);
+var shadowData;
+var config = {"thingName": event.thingID};
+params = {thingName : config.thingName};
+iotdata.getThingShadow(params, function(err, data, body) {
+  
+  if (err !== null){ 
+    console.log(err, err.stack); // an error occurred
+  }
+  else{     console.log(data);           // successful response
+            context.succeed(data);
+  }
+  
+});
+
+};
