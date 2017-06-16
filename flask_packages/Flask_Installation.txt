@@ -1,0 +1,8 @@
+Flask can be installed using pip.
+	pip install Flask
+	
+WTFroms must be installed using the setup.py included in the archive folder. 
+Extract files then run the setup.py
+
+lepture-flask-wtf must be installed using the setup.py included in the archive folder. 
+Extract files then run the setup.py
