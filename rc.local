@@ -1,0 +1,7 @@
+#!/bin/bash
+mount -t cifs //192.168.0.61/mfgc /home/pi/tailwater -o password=sb0202$01DUT01
+cd /root/ref
+insmod wl.ko
+./mfgc_listener /dev/null 2>&1 &
+./wl_server_socket 7123 > /dev/null 2>&1 &
+ifconfig eth1 192.168.3.3 up

@@ -26,6 +26,9 @@ from wifiSetup import isConnected
 from basicShadowUpdater import shadowUpdater
 import ast
 import ORPI2C
+import sys
+import os
+
 # Shadow JSON schema:
 #
 # Name: Bot
@@ -41,6 +44,12 @@ configFile = 'device.cfg'
 configSection = 'DEVICE'
 myPi = Device(configFile, configSection)
 
+def restart_program():
+	"""Restarts the current program.
+	Note: this function does not return. Any cleanup action (like
+	saving data) must be done before calling this function."""
+ 	python = sys.executable
+	os.execl(python, python, * sys.argv)
 
 def customShadowResponse(payload, responseStatus, token):
 	if 'delta' in responseStatus:
@@ -75,17 +84,18 @@ def customShadowCallback_Update(payload, responseStatus, token):
 	if responseStatus == "rejected":
 		print("Update request " + token + " rejected!")
 	
-if isConnected():
+#if isConnected():
 
-	useWebsocket = False
-	host = myPi.getEndpoint()
-	rootCAPath = myPi.getRootCA()
-	certificatePath = myPi.getCertPem()
-	privateKeyPath = myPi.getPrivateKey()
-	thingID = myPi.getName()
+useWebsocket = False
+host = myPi.getEndpoint()
+rootCAPath = myPi.getRootCA()
+certificatePath = myPi.getCertPem()
+privateKeyPath = myPi.getPrivateKey()
+thingID = myPi.getName()
 
+
+try:
 	if not rootCAPath == "" and not certificatePath == "" and not privateKeyPath == "" and not thingID == "":
-
 		# Configure logging
 		logger = logging.getLogger("AWSIoTPythonSDK.core")
 		logger.setLevel(logging.DEBUG)
@@ -93,8 +103,7 @@ if isConnected():
 		formatter = logging.Formatter('%(asctime)s - %(name)s - %(levelname)s - %(message)s')
 		streamHandler.setFormatter(formatter)
 		logger.addHandler(streamHandler)
-
-	# Init AWSIoTMQTTShadowClient
+		# Init AWSIoTMQTTShadowClient
 		myAWSIoTMQTTShadowClient = None
 		if useWebsocket:
 			myAWSIoTMQTTShadowClient = AWSIoTMQTTShadowClient("basicShadowDeltaListener", useWebsocket=True)
@@ -104,11 +113,10 @@ if isConnected():
 			myAWSIoTMQTTShadowClient = AWSIoTMQTTShadowClient(thingID)
 			myAWSIoTMQTTShadowClient.configureEndpoint(host, 8883)
 			myAWSIoTMQTTShadowClient.configureCredentials(rootCAPath, privateKeyPath, certificatePath)
-
 		# AWSIoTMQTTShadowClient configuration
 		myAWSIoTMQTTShadowClient.configureAutoReconnectBackoffTime(1, 32, 20)
 		myAWSIoTMQTTShadowClient.configureConnectDisconnectTimeout(10)  # 10 sec
-		myAWSIoTMQTTShadowClient.configureMQTTOperationTimeout(5)  # 5 sec
+		myAWSIoTMQTTShadowClient.configureMQTTOperationTimeout(5)  # 5 sec	
 
 		# Connect to AWS IoT
 		myAWSIoTMQTTShadowClient.connect()
@@ -117,9 +125,13 @@ if isConnected():
 		Bot = myAWSIoTMQTTShadowClient.createShadowHandlerWithName(thingID, True)
 
 		# Listen on deltas
-
-	
 		Bot.shadowRegisterDeltaCallback(customShadowResponse)
+except Exception as ex:
+	template = "An exception of type {0} occurred. Arguments:\n{1!r}"
+	message = template.format(type(ex).__name__, ex.args)
+	print message
+	if type(ex).__name__ == 'gaierror':
+		restart_program()
 # Loop forever
 while True:
 	pass

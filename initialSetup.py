@@ -10,7 +10,7 @@ from wifiSetup import isConnected
 import time
 import ORPI2C
 from classDevice import Device
-from postShadowUpdater import shadowUpdater
+from postShadowUpdater import updatePollInterval, updateORPVal
 # App config.
 DEBUG = True
 app = Flask(__name__)
@@ -53,7 +53,7 @@ def getMacAddr():
 #returns polling value to webpage 	
 @app.route('/_getReading')
 def add_numbers():
-	sensor = ORPI2C.ORPI2C()
+	sensor = ORPI2C.Probe()
 	reading = sensor.poll()
 	return jsonify(result=reading)
 
@@ -127,27 +127,28 @@ def runBasicForm():
 				flash('Wifi is connected. ')
 			else:
 				flash('Wifi is not connected please allow more time or resubmit your settings.')
-		#verifies form input
-		if len(pollInterval) >= 1 and len(pollInterval) <= 2 and pollInterval.isdigit() and (int(pollInterval) >= 1 and int(pollInterval) <= 60):
-			myPi.setPollInterval(pollInterval)
-			if isConnected():
-				shadowUpdater("desired", "property", pollInterval)
-		elif myPi.getPollInterval() == '':
-			flash('Poll interval not set. Please add value 1 to 60 minutes.')
-		elif not pollInterval.isdigit():
-			flash ('Query Interval not updated, must be an integer from 1 to 60.')
-		elif pollInterval.isdigit():
-			if (int(pollInterval) < 1 or int(pollInterval) > 60):
-				flash ('Query Interval	must be an integer from 1 to 60.')
-		if len(ssid) >= 1 and len(ssid) <= 35:
-			myPi.setSSID(ssid)
-			flash('Attempting to connect to' + ssid + '. Please check connection in about 1 minute.' )
-		elif myPi.getSSID()== '':
-			flash('SSID must be set to join WiFi network and upload data')	
-		if not password == '':
-			myPi.setPassword(password)
-		elif myPi.getPassword() == '' and not ssid == '':
-			flash('Password not set, assuming open encryption for ' + ssid + '. Please check connection in about 1 minute.')
+		else:
+			#verifies form input
+			if len(pollInterval) >= 1 and len(pollInterval) <= 2 and pollInterval.isdigit() and (int(pollInterval) >= 1 and int(pollInterval) <= 60):
+				myPi.setPollInterval(pollInterval)
+				if isConnected():
+					updatePollInterval(myPi.getName(), "pollInterval", pollInterval)
+			elif myPi.getPollInterval() == '':
+				flash('Poll interval not set. Please add value 1 to 60 minutes.')
+			elif not pollInterval.isdigit():
+				flash ('Query Interval not updated, must be an integer from 1 to 60.')
+			elif pollInterval.isdigit():
+				if (int(pollInterval) < 1 or int(pollInterval) > 60):
+					flash ('Query Interval	must be an integer from 1 to 60.')
+			if len(ssid) >= 1 and len(ssid) <= 35:
+				myPi.setSSID(ssid)
+				flash('Attempting to connect to ' + ssid + '. Please check connection in about 1 minute.' )
+			elif myPi.getSSID()== '':
+				flash('SSID must be set to join WiFi network and upload data')	
+			if not password == '':
+				myPi.setPassword(password)
+			elif myPi.getPassword() == '' and not ssid == '':
+				flash('Password not set, assuming open encryption for ' + ssid + '. Please check connection in about 1 minute.')
 		
 	return render_template('form.html', form=form)
  

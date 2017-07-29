@@ -4,24 +4,28 @@ import json
 import ORPI2C
 import sys
 import time
+from classDevice import Device
+
+configFile = 'device.cfg'
+configSection = 'DEVICE'
+myPi = Device(configFile, configSection)
 
 _data_filename = 'orp_data.csv'
 _error_log_filename = 'error_log'
 
 def get_target_range():
-    # TODO: get this from the config file/thing shadow
-    return [-50,50]
+    return [int(myPi.getLowLimit()),int(myPi.getHighLimit())]
 
 def get_polling_interval():
     """Return the configured polling interval in seconds as a float."""
-    # TODO: get this from the config file/thing shadow
-    return 15.0 * 60.0  # minutes converted to seconds
+    interval = int(myPi.getPollInterval())
+	
+    return interval * 60.0  # minutes converted to seconds
 
 
 def get_sensor_id():
     """Return the configured sensor_id as an integer."""
-    # TODO: get this from the config file
-    return '123456789'
+    return myPi.getName()
 
 
 def get_upload_interval():
@@ -29,9 +33,9 @@ def get_upload_interval():
 
     The datetime.timedelta is an object representing the difference between two datetimes.
     """
-    # TODO: get this from the config file
+
     #return datetime.timedelta(seconds=15.0)
-    interval = 1.0
+    interval = int(myPi.getUploadInterval())
     return datetime.timedelta(hours=interval)
 
 
@@ -111,24 +115,11 @@ def _update_error_log(error_timestamp, message):
 
 if __name__ == '__main__':
     # Load configuration parameters
-    host = 'a31wvqhbklkbzd.iot.us-west-2.amazonaws.com'  # TODO - make configurable
-    sensor_id = get_sensor_id()                          # TODO - maybe put in same file as host path
+    host = myPi.getEndpoint()
+    sensor_id = get_sensor_id()                        
     polling_interval = get_polling_interval()
     upload_interval = get_upload_interval()
     
-    # Read command-line arguments and initialize AWS Iot Client
-    usage = 'Usage:  python orp_manager.py <sensor_id>'
-    if len(sys.argv) < 2:
-        print usage
-        exit(1)
-    else:
-        client = AWSIoTClient.AWSIoTClient(host, 'root-CA.crt', sensor_id + '.cert.pem', sensor_id + '.private.key')
-        client.connect()
-
-        # TODO: These are for debug
-        client.subscribe('DataUploadConfirmation')
-        time.sleep(2)
-
     # Initialize ORP I2C Sensor
     orp_sensor = ORPI2C.Probe()
 
@@ -142,9 +133,17 @@ if __name__ == '__main__':
 
         # Upload data to the cloud database if the update interval has elapsed.
         if not last_upload or datetime.datetime.now() - last_upload > upload_interval:
-            _update_cloud_database()
-            last_upload = datetime.datetime.now()
-            print 'Data published to cloud.'
-
+            try:
+                client = AWSIoTClient.AWSIoTClient(host, myPi.getRootCA(), myPi.getCertPem(), myPi.getPrivateKey())
+                client.connect()
+                # TODO: These are for debug
+                client.subscribe('DataUploadConfirmation')
+                time.sleep(2)
+                _update_cloud_database()
+                last_upload = datetime.datetime.now()
+                print 'Data published to cloud.'
+            except Exception as e:
+                print e
+                pass
 
         time.sleep(polling_interval)

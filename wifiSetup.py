@@ -3,7 +3,6 @@
 
 import subprocess
 import time
-import ConfigParser
 from classDevice import Device
 from threading import Timer
 import ORPI2C
@@ -49,6 +48,9 @@ def connectWifi(Device):
 	scan = "scan"
 	scanResults = "scan_results"
 	addNetwork = "add_network"
+	uapDown= "sudo ifconfig uap0 down"
+	uapUp = "sudo ifconfig uap0 up"
+
 	setSSID = "set_network 0 ssid " + '\'\"' + Device.getSSID() + '\"\''
 	if Device.getPassword() == '':
 		setPassword = "set_network 0 key_mgmt NONE"
@@ -58,15 +60,23 @@ def connectWifi(Device):
 	requestIP = "dhclient wlan0"
 	
 	cmdArray = [wlDown, wlUp, startWpaSup, wpaCli + removeNetwork, wpaCli + scan, wpaCli + scanResults, wpaCli + addNetwork, 
-		wpaCli + setSSID, wpaCli + setPassword, wpaCli + enableNetwork, requestIP]
+		wpaCli + setSSID, wpaCli + setPassword, uapDown, wpaCli + enableNetwork, requestIP, uapUp]
 	
 	for cmd in cmdArray:
 		if cmd == startWpaSup and "wpa_supplicant" not in sendcmd(wpaSupCeck):
 			sendcmd(startWpaSup)
-		elif not cmd == startWpaSup:
+		else:
 			time.sleep(1)
-			out = sendcmd(cmd)
-
+			#if ssid not found abort process and start over on next loop
+			if scanResults in cmd:
+				out = sendcmd(cmd)
+				print out
+				if not Device.getSSID() in out:
+					return isConnected()
+			else:
+				
+				out = sendcmd(cmd)
+				print out
 	return isConnected()
 
 
@@ -85,8 +95,20 @@ def main():
 		if not isConnected():
 			if connectWifi(myPi):
 				time.sleep(30)
+				#get wlan0 ipaddr and reset route table setting wlan0 as default
+				output = sendcmd('sudo route -n | grep wlan0')
+                        	wordList = output.split()
+                        	ipaddr = wordList[1]
+				sendcmd('sudo route add default dev wlan0 gw ' + ipaddr + ' metric 0')
+				time.sleep(30)
 				sensor = ORPI2C.Probe()
-				reading = sensor.poll() 
+				reading = sensor.poll()
+				#update hwclock on wificonnection
+				sendcmd('sudo /etc/init.d/ntp stop')
+				sendcmd('sudo ntpd -q -g')
+				sendcmd('sudo /etc/init.d/ntp start')
+				sendcmd('sudo hwclock -w')
+				sendcmd('sudo hwclock -s') 
 				updatePollInterval(myPi.getName(), "pollInterval", myPi.getPollInterval())
 				updateORPVal(myPi.getName(), "orpval", str(reading))
 	
